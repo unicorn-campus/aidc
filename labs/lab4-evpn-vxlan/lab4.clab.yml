@@ -1,0 +1,59 @@
+# 4단계: EVPN으로 VxLAN 자동화 (spine 2대, leaf 2대, 서버 2대)
+# lab3과 같은 구성이지만 상대 VTEP을 손으로 적지 않음
+# leaf와 spine이 BGP l2vpn evpn 경로를 주고받고, leaf의 FRR이 그 경로로 터널 행선지를 채움
+name: lab4
+
+mgmt:
+  network: dcnet-mgmt
+  ipv4-subnet: 172.30.30.0/24
+  ipv6-subnet: 3fff:172:30:30::/64
+
+topology:
+  kinds:
+    linux:
+      image: quay.io/frrouting/frr:10.2.1
+  nodes:
+    spine1:
+      kind: linux
+      binds: [cfg/daemons:/etc/frr/daemons, cfg/spine1.conf:/etc/frr/frr.conf, cfg/vtysh.conf:/etc/frr/vtysh.conf]
+    spine2:
+      kind: linux
+      binds: [cfg/daemons:/etc/frr/daemons, cfg/spine2.conf:/etc/frr/frr.conf, cfg/vtysh.conf:/etc/frr/vtysh.conf]
+    leaf1:
+      kind: linux
+      binds:
+        - cfg/daemons:/etc/frr/daemons
+        - cfg/leaf1.conf:/etc/frr/frr.conf
+        - cfg/vtysh.conf:/etc/frr/vtysh.conf
+        - cfg/vxlan-evpn.sh:/root/vxlan-evpn.sh
+      exec:
+        # 내 VTEP 주소만 줌. 상대 VTEP은 EVPN이 알려 줌
+        - sh /root/vxlan-evpn.sh 10.0.0.11
+    leaf2:
+      kind: linux
+      binds:
+        - cfg/daemons:/etc/frr/daemons
+        - cfg/leaf2.conf:/etc/frr/frr.conf
+        - cfg/vtysh.conf:/etc/frr/vtysh.conf
+        - cfg/vxlan-evpn.sh:/root/vxlan-evpn.sh
+      exec:
+        - sh /root/vxlan-evpn.sh 10.0.0.12
+    h1:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool:latest
+      exec:
+        - ip link set eth1 mtu 1500
+        - ip addr add 10.10.10.11/24 dev eth1
+    h2:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool:latest
+      exec:
+        - ip link set eth1 mtu 1500
+        - ip addr add 10.10.10.12/24 dev eth1
+  links:
+    - endpoints: ["leaf1:eth1", "spine1:eth1"]
+    - endpoints: ["leaf1:eth2", "spine2:eth1"]
+    - endpoints: ["leaf2:eth1", "spine1:eth2"]
+    - endpoints: ["leaf2:eth2", "spine2:eth2"]
+    - endpoints: ["leaf1:eth3", "h1:eth1"]
+    - endpoints: ["leaf2:eth3", "h2:eth1"]

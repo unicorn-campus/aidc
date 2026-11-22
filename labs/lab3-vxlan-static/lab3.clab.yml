@@ -1,0 +1,60 @@
+# 3단계: VxLAN 터널을 손으로 만들기 (spine 2대, leaf 2대, 서버 2대)
+# 바탕(언더레이)은 lab2와 같은 BGP unnumbered. BGP는 leaf 루프백(VTEP 주소)끼리 닿게 하는 일만 함
+# 그 위에 leaf가 VxLAN 터널(VNI 100)을 만들고, 상대 leaf의 VTEP 주소는 손으로 적음(cfg/vxlan-static.sh)
+# h1, h2는 서로 다른 leaf에 붙어 있지만 같은 서브넷(10.10.10.0/24)에 있는 것처럼 통신함
+name: lab3
+
+mgmt:
+  network: dcnet-mgmt
+  ipv4-subnet: 172.30.30.0/24
+  ipv6-subnet: 3fff:172:30:30::/64
+
+topology:
+  kinds:
+    linux:
+      image: quay.io/frrouting/frr:10.2.1
+  nodes:
+    spine1:
+      kind: linux
+      binds: [cfg/daemons:/etc/frr/daemons, cfg/spine1.conf:/etc/frr/frr.conf, cfg/vtysh.conf:/etc/frr/vtysh.conf]
+    spine2:
+      kind: linux
+      binds: [cfg/daemons:/etc/frr/daemons, cfg/spine2.conf:/etc/frr/frr.conf, cfg/vtysh.conf:/etc/frr/vtysh.conf]
+    leaf1:
+      kind: linux
+      binds:
+        - cfg/daemons:/etc/frr/daemons
+        - cfg/leaf1.conf:/etc/frr/frr.conf
+        - cfg/vtysh.conf:/etc/frr/vtysh.conf
+        - cfg/vxlan-static.sh:/root/vxlan-static.sh
+      exec:
+        # 내 VTEP 10.0.0.11, 상대 VTEP 10.0.0.12 (손으로 적는 부분)
+        - sh /root/vxlan-static.sh 10.0.0.11 10.0.0.12
+    leaf2:
+      kind: linux
+      binds:
+        - cfg/daemons:/etc/frr/daemons
+        - cfg/leaf2.conf:/etc/frr/frr.conf
+        - cfg/vtysh.conf:/etc/frr/vtysh.conf
+        - cfg/vxlan-static.sh:/root/vxlan-static.sh
+      exec:
+        - sh /root/vxlan-static.sh 10.0.0.12 10.0.0.11
+    h1:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool:latest
+      exec:
+        - ip link set eth1 mtu 1500
+        - ip addr add 10.10.10.11/24 dev eth1
+    h2:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool:latest
+      exec:
+        - ip link set eth1 mtu 1500
+        - ip addr add 10.10.10.12/24 dev eth1
+  links:
+    - endpoints: ["leaf1:eth1", "spine1:eth1"]
+    - endpoints: ["leaf1:eth2", "spine2:eth1"]
+    - endpoints: ["leaf2:eth1", "spine1:eth2"]
+    - endpoints: ["leaf2:eth2", "spine2:eth2"]
+    - endpoints: ["leaf1:eth3", "h1:eth1"]
+    - endpoints: ["leaf2:eth3", "h2:eth1"]
