@@ -1,0 +1,40 @@
+# Codex 프로젝트 설정. 아래 마커 사이는 scripts/sync-agents.py 가 관리함.
+# 마커 밖에는 팀 공용 설정을 자유롭게 추가할 수 있음.
+
+# >>> sync-agents (자동 생성 구간 시작 — 손으로 고치지 않음)
+# .codex/agents/<이름>.toml 을 Codex 커스텀 에이전트로 등록함.
+# 2026-09-03 실측: .codex/agents/ 드롭인·[agents.*] 인라인 정의는 인식되지 않고 config_file 등록만 동작함.
+# config_file 의 상대경로는 이 파일(.codex/config.toml) 기준으로 풀림.
+
+[agents.eduni]
+description = "기술 교육과 문서 엔지니어 에듀니. 슬라이드 스크립트, 실습 안내서, 코드와 설정(FRR 설정, YAML, 셸 스크립트) 해설, 용어사전, 예상 질문과 답을 그 분야를 처음 보는 사람에게 쉬운 한국어로 풀어 쓰는 전문가. 해설, 쉽게 설명, 초보자용 자료, 용어사전이 필요할 때 사용."
+config_file = "agents/eduni.toml"
+
+[agents.facini]
+description = "데이터센터 시설과 설계 엔지니어 퍼시니. 전력(UPS, 배전반), 냉방(항온항습, CFD), PUE와 에너지 효율, 소방과 방재 기준(KFS 1280), 시설 제어 시스템, 설계 가이드라인, 지속 가능한 운영, DBO 모델 교재 작성 전문가. 데이터센터 시설과 설계 실무를 계산과 사례 중심으로 다룰 때 사용."
+config_file = "agents/facini.toml"
+
+[agents.gpuni]
+description = "GPU 인프라 엔지니어 지피니. GPU 드라이버와 CUDA, NVLink, NCCL, RDMA, RoCE, InfiniBand, MIG, vGPU, Time Slicing, 쿠버네티스 GPU 공유와 GPU Operator 실습과 이론 작성 전문가. GPU 클러스터와 AI 학습 인프라를 다루거나 장비가 없어 못 하는 실습의 범위를 정할 때 사용."
+config_file = "agents/gpuni.toml"
+
+[agents.kubeni]
+description = "클라우드 네이티브 엔지니어 쿠베니. 서버, 네트워크, 스토리지 가상화와 SDDC, Docker, Kubernetes, Helm, Prometheus, Grafana, kepler, 하이브리드 클라우드, 배포 자동화 실습과 이론 작성 전문가이며 316시간 프로젝트의 기술 주도. 가상화, 컨테이너, 쿠버네티스, 모니터링, 프로젝트 기술 구성을 다룰 때 사용."
+config_file = "agents/kubeni.toml"
+
+[agents.labni]
+description = "실습 환경 엔지니어 랩니. 강의장 PC 환경 기준(Windows 11, WSL2, Docker), 교과목별 실습 환경(containerlab, kind, 가상머신), check.sh, reset.sh, fault-demo.sh, 실습 사이 자원 충돌(주소, 포트, 메모리) 조정, 수강생 AI용 AGENTS.md 작성 전문가. 실습 환경을 만들거나 점검하고 검사와 되돌리기와 고장 연습을 붙일 때 사용."
+config_file = "agents/labni.toml"
+
+[agents.netni]
+description = "네트워크 엔지니어 넷니. 라우팅(OSPF, BGP), 스위칭(VLAN, 브리지), QoS, leaf-spine, EVPN, VxLAN, SDN, FRR 실습과 이론 작성 전문가. 데이터센터 네트워크 설정과 실습을 다룰 때 사용."
+config_file = "agents/netni.toml"
+
+[agents.secuni]
+description = "보안 엔지니어 시큐니. 물리, 네트워크, 리눅스 서버 보안(방화벽, IDS/IPS, 계정, 취약점 관리), 쿠버네티스 인증과 권한(RBAC), 네트워크 정책, Pod 보안, Service Mesh mTLS, Vault, AI 모델과 데이터셋 보안 실습과 이론 작성 전문가. 데이터센터 보안과 막는 규칙의 시험을 다룰 때 사용."
+config_file = "agents/secuni.toml"
+
+[agents.serverni]
+description = "리눅스 서버와 스토리지 엔지니어 서버니. 리눅스 설치와 파일시스템, 사용자와 그룹, Web, NFS, DB, DNS, 성능 분석, bash와 ansible 자동화, 블록, 파일, 오브젝트 스토리지, Ceph, GlusterFS, MinIO, S3 실습과 이론 작성 전문가. 서버 관리와 스토리지 구축을 다룰 때 사용."
+config_file = "agents/serverni.toml"
+# <<< sync-agents (자동 생성 구간 끝)

@@ -1,0 +1,28 @@
+# 1일차 확인용: 스위치(FRR) 2대를 선 하나로 잇고 OSPF로 서로의 주소를 배우게 함
+name: lab1
+
+# 관리용 네트워크: 기본값 172.20.20.0/24가 이 PC의 다른 Docker 네트워크와 겹쳐서 바꿈
+mgmt:
+  network: dcnet-mgmt
+  ipv4-subnet: 172.30.30.0/24
+  ipv6-subnet: 3fff:172:30:30::/64
+
+topology:
+  kinds:
+    linux:
+      image: quay.io/frrouting/frr:10.2.1
+  nodes:
+    sw1:
+      kind: linux
+      binds:
+        - cfg/daemons:/etc/frr/daemons
+        - cfg/sw1.conf:/etc/frr/frr.conf
+        - cfg/vtysh.conf:/etc/frr/vtysh.conf
+    sw2:
+      kind: linux
+      binds:
+        - cfg/daemons:/etc/frr/daemons
+        - cfg/sw2.conf:/etc/frr/frr.conf
+        - cfg/vtysh.conf:/etc/frr/vtysh.conf
+  links:
+    - endpoints: ["sw1:eth1", "sw2:eth1"]

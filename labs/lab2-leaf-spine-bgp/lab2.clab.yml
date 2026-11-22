@@ -1,0 +1,45 @@
+# 2단계: leaf-spine 구성 (spine 2대, leaf 2대, 서버 역할 호스트 2대)
+# 스위치끼리는 BGP unnumbered(IP 없이 인터페이스 이름으로 이웃 맺기)로 경로를 주고받음
+name: lab2
+
+mgmt:
+  network: dcnet-mgmt
+  ipv4-subnet: 172.30.30.0/24
+  ipv6-subnet: 3fff:172:30:30::/64
+
+topology:
+  kinds:
+    linux:
+      image: quay.io/frrouting/frr:10.2.1
+  nodes:
+    spine1:
+      kind: linux
+      binds: [cfg/daemons:/etc/frr/daemons, cfg/spine1.conf:/etc/frr/frr.conf, cfg/vtysh.conf:/etc/frr/vtysh.conf]
+    spine2:
+      kind: linux
+      binds: [cfg/daemons:/etc/frr/daemons, cfg/spine2.conf:/etc/frr/frr.conf, cfg/vtysh.conf:/etc/frr/vtysh.conf]
+    leaf1:
+      kind: linux
+      binds: [cfg/daemons:/etc/frr/daemons, cfg/leaf1.conf:/etc/frr/frr.conf, cfg/vtysh.conf:/etc/frr/vtysh.conf]
+    leaf2:
+      kind: linux
+      binds: [cfg/daemons:/etc/frr/daemons, cfg/leaf2.conf:/etc/frr/frr.conf, cfg/vtysh.conf:/etc/frr/vtysh.conf]
+    h1:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool:latest
+      exec:
+        - ip addr add 192.168.1.10/24 dev eth1
+        - ip route add 192.168.0.0/16 via 192.168.1.1
+    h2:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool:latest
+      exec:
+        - ip addr add 192.168.2.10/24 dev eth1
+        - ip route add 192.168.0.0/16 via 192.168.2.1
+  links:
+    - endpoints: ["leaf1:eth1", "spine1:eth1"]
+    - endpoints: ["leaf1:eth2", "spine2:eth1"]
+    - endpoints: ["leaf2:eth1", "spine1:eth2"]
+    - endpoints: ["leaf2:eth2", "spine2:eth2"]
+    - endpoints: ["leaf1:eth3", "h1:eth1"]
+    - endpoints: ["leaf2:eth3", "h2:eth1"]
