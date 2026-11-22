@@ -125,7 +125,16 @@
    ```bash
    ./clab.sh destroy -t lab2.clab.yml --cleanup
    ```
-   이렇게 나오면 성공: `Removed container` 줄이 6개 보임(미확인: 이 안내서 작성 중에는 lab2를 계속 띄워 두어 끄는 출력은 보지 못함)  
+   이렇게 나오면 성공: `Removed container` 줄이 6개 보임  
+   ```text
+   INFO Destroying lab name=lab2
+   INFO Removed container name=clab-lab2-h1
+   INFO Removed container name=clab-lab2-h2
+   INFO Removed container name=clab-lab2-spine1
+   INFO Removed container name=clab-lab2-leaf1
+   INFO Removed container name=clab-lab2-leaf2
+   INFO Removed container name=clab-lab2-spine2
+   ```
    뜻: 6개 컨테이너를 모두 지움
 
 ## 고장 연습
