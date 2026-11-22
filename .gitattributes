@@ -3,4 +3,6 @@
 *.yml     text eol=lf
 *.yaml    text eol=lf
 *.conf    text eol=lf
+*.env     text eol=lf
+*.tmpl    text eol=lf
 labs/**/daemons text eol=lf
