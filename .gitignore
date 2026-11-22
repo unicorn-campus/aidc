@@ -20,6 +20,9 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
+# 내려받은 VM 이미지 등 큰 파일
+.cache/
+
 # 임시 파일 (URL 참조 저장 위치 등)
 .temp/
 temp/

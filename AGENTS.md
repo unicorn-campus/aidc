@@ -309,6 +309,12 @@ GPU 인프라 엔지니어
 - FRR 10.2.1 스위치 1대가 메모리 약 18MB를 씀. leaf-spine 4대 + 서버 2대가 문제없이 뜸
 - 편법 static 경로를 spine 1대로만 넣으면 통신이 끊김(원인 미확인, rp_filter는 느슨한 모드라 원인 아님).
   2대 모두로 넣으면 통신됨
+- WSL 커널(`6.18.58.1-microsoft-standard-WSL2`)에는 `rdma_rxe`, `siw` 모듈이 없음. Docker Desktop도 같은 커널이라
+  RDMA 실습(lab5)은 VirtualBox 7.2.22 VM 2대(Ubuntu 24.04 클라우드 이미지)로 함. VM 안에는 `linux-modules-extra` 설치 필요
+- WSL2와 Docker Desktop이 VT-x를 잡고 있어 VirtualBox가 Hyper-V 폴백(NEM)으로 돌아 느림.
+  VM 처음 만들기 약 15분, 스냅샷 되돌리기 3 ~ 8분(실측 165, 168, 347, 498초), 부팅이 initramfs에서 가끔 멈춤(원인 미확인)
+- WSL에서 VirtualBox VM의 NAT 포트로 SSH 하려면 `127.0.0.1`이 아니라 WSL 기본 게이트웨이 주소로 붙음
+- Soft-RoCE VM에서 rping이 도는 중에 `rdma link delete`를 하면 VM 커널 panic 실측. `ibv_rc_pingpong` 기본값(1000회)은 멈출 수 있어 `-n 10` 사용
 
 ## Lessons Learned
 > skill/agent 실행 중 확인된 시행착오와 교훈을 기록한다.

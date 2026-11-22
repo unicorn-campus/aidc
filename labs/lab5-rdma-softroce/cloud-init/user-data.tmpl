@@ -1,0 +1,53 @@
+#cloud-config
+# 처음 부팅할 때 한 번만 도는 설정. @@이름@@ 자리는 vm-up.sh 가 실제 값으로 바꿔 넣음
+hostname: @@VMNAME@@
+fqdn: @@VMNAME@@
+prefer_fqdn_over_hostname: false
+manage_etc_hosts: true
+
+# 비밀번호 로그인은 쓰지 않음. SSH 공개키로만 들어감
+ssh_pwauth: false
+disable_root: true
+
+users:
+  - name: @@VMUSER@@
+    gecos: aidc lab5
+    groups: [adm, sudo]
+    shell: /bin/bash
+    lock_passwd: true
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    ssh_authorized_keys:
+      - @@PUBKEY@@
+
+# 두 VM 이 이름으로 서로를 부를 수 있게 함
+write_files:
+  - path: /etc/hosts.lab5
+    permissions: "0644"
+    content: |
+      @@HOSTS@@
+  # 부팅할 때마다 Soft-RoCE 커널 모듈을 올림
+  - path: /etc/modules-load.d/rdma-rxe.conf
+    permissions: "0644"
+    content: |
+      rdma_rxe
+
+package_update: true
+packages:
+  # rdma 명령 (rdma link add ...)
+  - rdma-core
+  # ibv_devices, ibv_devinfo, ibv_rc_pingpong
+  - ibverbs-utils
+  # rping
+  - rdmacm-utils
+  # ib_send_bw, ib_write_bw
+  - perftest
+  # UDP 4791 패킷을 눈으로 보기 위함
+  - tcpdump
+
+runcmd:
+  # rdma_rxe 모듈은 기본 커널 패키지에 없고 linux-modules-extra 에 들어 있음
+  - [ sh, -c, "apt-get install -y linux-modules-extra-$(uname -r)" ]
+  - [ sh, -c, "cat /etc/hosts.lab5 >> /etc/hosts" ]
+  - [ sh, -c, "modprobe rdma_rxe && echo rdma_rxe-ok > /var/log/lab5-modprobe.log 2>&1 || modprobe rdma_rxe > /var/log/lab5-modprobe.log 2>&1" ]
+
+final_message: "lab5 cloud-init 끝남 (부팅 뒤 $UPTIME 초)"

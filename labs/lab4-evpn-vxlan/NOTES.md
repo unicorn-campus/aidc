@@ -66,7 +66,7 @@
 
 ## 띄우기와 내리기
 ```bash
-cd /mnt/c/Users/hiond/class/aidc/labs/lab4-evpn-vxlan
+cd /mnt/c/Users/<사용자>/class/aidc/labs/lab4-evpn-vxlan
 ./clab.sh deploy -t lab4.clab.yml
 ./clab.sh destroy -t lab4.clab.yml --cleanup
 ```

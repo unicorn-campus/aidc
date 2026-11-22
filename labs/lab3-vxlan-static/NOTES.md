@@ -63,7 +63,7 @@
 
 ## 띄우기와 내리기
 ```bash
-cd /mnt/c/Users/hiond/class/aidc/labs/lab3-vxlan-static
+cd /mnt/c/Users/<사용자>/class/aidc/labs/lab3-vxlan-static
 ./clab.sh deploy -t lab3.clab.yml
 ./clab.sh destroy -t lab3.clab.yml --cleanup
 ```

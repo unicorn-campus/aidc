@@ -1,0 +1,16 @@
+# netplan 형식(cloud-init network-config v2).
+# 랜카드 이름은 VirtualBox 설정에 따라 달라질 수 있으므로 MAC 주소로 찾아 붙임
+version: 2
+ethernets:
+  nat:
+    match:
+      macaddress: "@@MAC_NAT@@"
+    dhcp4: true
+    dhcp6: false
+  rdmanet:
+    match:
+      macaddress: "@@MAC_INT@@"
+    dhcp4: false
+    dhcp6: false
+    addresses:
+      - @@RDMA_IP@@/@@RDMA_PREFIX@@
