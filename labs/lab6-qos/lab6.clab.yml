@@ -1,0 +1,66 @@
+# 6단계: QoS (중요한 트래픽에 대역을 보장하기)
+# 보내는 쪽 2대(h1 중요, h2 대량) -> r1 -> 좁은 구간(10Mbit/s) -> r2 -> 받는 쪽 h3
+# r1이 들어오는 포트에서 트래픽을 나누고(분류) DSCP를 붙인 뒤(표시),
+# 나가는 포트에서 DSCP별로 줄을 세워 대역을 나눠 줌(큐)
+name: lab6
+
+mgmt:
+  network: dcnet-mgmt
+  ipv4-subnet: 172.30.30.0/24
+  ipv6-subnet: 3fff:172:30:30::/64
+
+topology:
+  kinds:
+    linux:
+      image: quay.io/frrouting/frr:10.2.1
+  nodes:
+    r1:
+      kind: linux
+      binds:
+        - cfg/daemons:/etc/frr/daemons
+        - cfg/r1.conf:/etc/frr/frr.conf
+        - cfg/vtysh.conf:/etc/frr/vtysh.conf
+        - cfg/mark.sh:/root/mark.sh
+        - cfg/shape.sh:/root/shape.sh
+      exec:
+        # 들어오는 쪽에서 분류와 표시를 걸어 둠 (QoS를 켜든 끄든 늘 걸려 있음)
+        - sh /root/mark.sh
+        # 처음에는 "좁은 구간만 있고 QoS는 없는" 상태로 시작함
+        - sh /root/shape.sh off
+    r2:
+      kind: linux
+      binds:
+        - cfg/daemons:/etc/frr/daemons
+        - cfg/r2.conf:/etc/frr/frr.conf
+        - cfg/vtysh.conf:/etc/frr/vtysh.conf
+    h1:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool:latest
+      exec:
+        # 중요한 트래픽을 보내는 쪽. 자기는 DSCP를 붙이지 않음(r1이 붙임)
+        - ip addr add 10.60.1.10/24 dev eth1
+        - ip route add 10.60.0.0/16 via 10.60.1.1
+    h2:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool:latest
+      exec:
+        # 대량 트래픽을 보내는 쪽
+        - ip addr add 10.60.2.10/24 dev eth1
+        - ip route add 10.60.0.0/16 via 10.60.2.1
+        # ECN 실험용: TCP가 ECN을 쓰겠다고 먼저 말하게 함(기본값 2는 상대가 먼저 말할 때만 씀)
+        - sysctl -w net.ipv4.tcp_ecn=1
+    h3:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool:latest
+      exec:
+        # 받는 쪽. iperf3 서버 2개를 띄워 둠(5201 중요, 5202 대량)
+        - ip addr add 10.60.3.10/24 dev eth1
+        - ip route add 10.60.0.0/16 via 10.60.3.1
+        - sysctl -w net.ipv4.tcp_ecn=1
+        - sh -c "iperf3 -s -p 5201 -D"
+        - sh -c "iperf3 -s -p 5202 -D"
+  links:
+    - endpoints: ["h1:eth1", "r1:eth1"]
+    - endpoints: ["h2:eth1", "r1:eth2"]
+    - endpoints: ["r1:eth3", "r2:eth1"]   # 좁은 구간(여기에 큐를 만듦)
+    - endpoints: ["r2:eth2", "h3:eth1"]
