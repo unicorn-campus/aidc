@@ -44,6 +44,7 @@
 ## 준비물
 - Docker Desktop이 켜져 있어야 함  
 - Windows 터미널(또는 PowerShell)을 열고 `wsl`을 입력해 WSL을 엶  
+- `check.sh`가 WSL에서 `jq`를 쓰므로 깔려 있어야 함(`jq --version`으로 확인, 없으면 `sudo apt install -y jq`)  
 - 실습 폴더로 이동함. 아래 `<사용자>`는 내 Windows 사용자 이름으로 바꿈  
   ```bash
   cd /mnt/c/Users/<사용자>/class/aidc/labs/lab2-leaf-spine-bgp
